@@ -10,19 +10,22 @@ yarn add fpm-plugin-schedule
 
 - Create A Job
 
-  Call Function `job.create` 
+  Call Function `job.createCronJob` 
   - Cycle Job Use Cron
     See Cron Detail -> [https://github.com/node-schedule/node-schedule#jobs-and-scheduling](https://github.com/node-schedule/node-schedule#jobs-and-scheduling)
-  - Once Job Use Delay
 
 - Get Jobs
 
-  Call Function `job.getJobs`
+  Call Function `job.getJobs()`
 
-- Start Autorun Jobs
+- Cancel Job
 
-  Call Function `job.autorun`
+  Call Function `job.cancelJob(id:Number!)`
 
+
+### Important
+
+It will create schedule.json after you create anyone job
 
 ### Handle The Jobs' Result
 

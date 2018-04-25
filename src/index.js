@@ -24,7 +24,7 @@ export default {
       if('create' === op){
         id = parseInt((_.max(_.keys(jobDB)) || 0)) + 1
         jobDB[id] = args
-      }else if('cannel' === op){
+      }else if('cancel' === op){
         delete jobDB[args.id]
       }
       // flush
@@ -70,7 +70,7 @@ export default {
       const job = jobs[args.id]
       schedule.cancelJob(job)
       delete jobs[args.id]
-      saveJobs('cannel', args)
+      saveJobs('cancel', args)
       return 1
     }
 
