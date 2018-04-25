@@ -5,14 +5,31 @@ YF.init({appkey: '123123', masterKey: '123123', endpoint: 'http://localhost:9999
 
 
 describe('SCHEDULE', function(){
-  it('createJob function', function(done){
-    var func = new YF.Func('job.create');
-    func.invoke({method: 'demo.foo', v: '0.0.1', cron: '35 11 * * *', id: 1, name: 'demo'})
+  beforeEach(done => {
+    var func = new YF.Func('job.createCronJob');
+    func.invoke({method: 'demo.foo', v: '0.0.1', cron: '35 13 * * *', id: 1, name: 'demo', autorun: 1})
       .then(function(data){
-        console.log(data);
+        console.log(data)
         done();
       }).catch(function(err){
         done(err);
-      });
-  });
+      })
+  })
+  
+
+  afterEach(done => {
+    console.log('done')
+    done()
+  })
+
+  it('getJobs function', function(done){
+    var func = new YF.Func('job.getJobs');
+    func.invoke({})
+      .then(function(data){
+        console.log(data)
+        done();
+      }).catch(function(err){
+        done(err);
+      })
+  })
 })

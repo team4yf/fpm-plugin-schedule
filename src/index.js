@@ -1,10 +1,59 @@
 "use strict";
 import _ from 'lodash'
 import schedule from 'node-schedule'
+import fs from 'fs'
+import path from 'path'
 
 export default {
   bind: (fpm) => {
+    // The Jobs Collection
     const jobs = {}
+
+    let jobDB = {}
+
+    let isFileStore = true
+
+    let dbFilePath
+
+    // fpm-plugin-mysql installed ?
+    // get datas from db
+    if(fpm.isPluginInstalled('fpm-plugin-mysql')){
+      // if table exists?
+
+      // 
+      
+    }
+
+    const loadJobs = () =>{
+      if(isFileStore){
+        // get datas from fs
+        dbFilePath = path.join(fpm.get('CWD'), 'jobs.json')
+        if(fs.existsSync(dbFilePath)){
+          jobDB = require(dbFilePath)
+        }        
+      }else{
+        // load from mysql db
+        
+      }      
+    }
+
+    const saveJobs = (op, args) =>{
+      if('create' === op){
+        jobDB[args.id] = args
+      }else if('cannel' === op){
+        delete jobDB[args.id]
+      }
+      // flush
+      if(isFileStore){
+        //dbFilePath
+        fs.createWriteStream(dbFilePath).write(JSON.stringify(jobDB), (err) => {
+          if (err) throw err
+        })
+      }else{
+        // insert into db
+      }
+    }
+
     /**
      * id!
      * name!
@@ -13,37 +62,65 @@ export default {
      * cron!
      * @param {*} args 
      */
-    const createJob = (args) =>{
-      jobs[args.id] = schedule.scheduleJob(args.cron, () =>{
+    const createCronJob = (args) =>{
+      jobs[args.id] = schedule.scheduleJob(args.name, args.cron, () =>{
         let { method, v } = args
         fpm.execute(method, args, v)
           .then(data => {
-            //TODO: how to recode the DATA
-            //Use Publish ? pub/sub Is suport one process Mode
+            fpm.publish('cronjob.done', {
+              args,
+              result: data
+            })
           })
           .catch(err => {
-            //TODO: how to handle the ERROR
-            //Use Publish ? pub/sub Is suport one process Mode
+            fpm.publish('cronjob.error', {
+              args,
+              error: err
+            })
           })
       })
-      return {
-        data: {
-          jobId: args.id,
-          jobName: args.name
-        }
-      }
+      const {id, name} = args
+      return {id, name}
     }
+
+    const cancelJob = args => {
+      if(!_.has(jobs, args.id)){
+        return 0
+      }
+      const job = jobs[args.id]
+      schedule.cancelJob(job)
+      delete jobs[args.id]
+      saveJobs('cannel', args)
+      return 1
+    }
+
+    const autorunJobs = () => {      
+      _.map(jobDB, (item) => {
+        createCronJob(item)
+      })
+    }
+
     fpm.registerAction('BEFORE_SERVER_START', () => {
 
-      
       //extend module
       fpm.extendModule('job', {
-        create: (args) => {
-          let data = createJob(args)
-          console.log(data)
+        createCronJob: (args) => {
+          saveJobs('create', args)
+          let data = createCronJob(args)
           return Promise.resolve(data)
+        },
+        cancelJob: cancelJob,
+        getJobs: args => {
+          return _.map(jobs, (job, id) => {
+            return { id, name: job.name }
+          })
         }
       })
+
+      loadJobs()
+
+      //autorun jobs 
+      autorunJobs()
     })
   }
 }

@@ -22,3 +22,9 @@ yarn add fpm-plugin-schedule
 - Start Autorun Jobs
 
   Call Function `job.autorun`
+
+
+### Handle The Jobs' Result
+
+You can call `fpm.subscribe('cronjob.done')`; and the result in `data.result`
+You should call `fpm.subscribe('cronjob.error')`; and the error in `data.error`

@@ -28,6 +28,6 @@
     "mocha": "^5.1.1",
     "nodemon": "^1.17.3",
     "yf-fpm-client-nodejs": "^1.0.11",
-    "yf-fpm-server": "^2.2.23"
+    "yf-fpm-server": "^2.2.25"
   }
 }
