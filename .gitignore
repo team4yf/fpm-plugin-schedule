@@ -3,4 +3,4 @@ node_modules
 coverage
 lib/
 views/
-jobs.json
+schedule.json

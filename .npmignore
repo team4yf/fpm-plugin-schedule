@@ -2,4 +2,4 @@ src/
 spec/
 dev/
 views/
-jobs.json
+schedule.json
