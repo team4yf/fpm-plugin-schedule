@@ -1,6 +1,53 @@
-var schedule = require('node-schedule');
-var _ = require('lodash');
+"use strict";
+import _ from 'lodash'
+import schedule from 'node-schedule'
 
+export default {
+  bind: (fpm) => {
+    const jobs = {}
+    /**
+     * id!
+     * name!
+     * method!
+     * v!
+     * cron!
+     * @param {*} args 
+     */
+    const createJob = (args) =>{
+      jobs[args.id] = schedule.scheduleJob(args.cron, () =>{
+        let { method, v } = args
+        fpm.execute(method, args, v)
+          .then(data => {
+            //TODO: how to recode the DATA
+            //Use Publish ? pub/sub Is suport one process Mode
+          })
+          .catch(err => {
+            //TODO: how to handle the ERROR
+            //Use Publish ? pub/sub Is suport one process Mode
+          })
+      })
+      return {
+        data: {
+          jobId: args.id,
+          jobName: args.name
+        }
+      }
+    }
+    fpm.registerAction('BEFORE_SERVER_START', () => {
+
+      
+      //extend module
+      fpm.extendModule('job', {
+        create: (args) => {
+          let data = createJob(args)
+          console.log(data)
+          return Promise.resolve(data)
+        }
+      })
+    })
+  }
+}
+/*
 var scheduleBiz = function(biz, fpm){
 
   var jobs = [];
@@ -68,3 +115,4 @@ module.exports = {
   }
 
 };
+//*/
