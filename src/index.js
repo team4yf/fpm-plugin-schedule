@@ -11,47 +11,27 @@ export default {
 
     let jobDB = {}
 
-    let isFileStore = true
-
-    let dbFilePath
-
-    // fpm-plugin-mysql installed ?
-    // get datas from db
-    if(fpm.isPluginInstalled('fpm-plugin-mysql')){
-      // if table exists?
-
-      // 
-      
-    }
+    let dbFilePath = path.join(fpm.get('CWD'), 'schedule.json') 
 
     const loadJobs = () =>{
-      if(isFileStore){
-        // get datas from fs
-        dbFilePath = path.join(fpm.get('CWD'), 'jobs.json')
-        if(fs.existsSync(dbFilePath)){
-          jobDB = require(dbFilePath)
-        }        
-      }else{
-        // load from mysql db
-        
-      }      
+      if(fs.existsSync(dbFilePath)){
+        jobDB = require(dbFilePath)
+      }    
     }
 
     const saveJobs = (op, args) =>{
+      let id
       if('create' === op){
-        jobDB[args.id] = args
+        id = parseInt((_.max(_.keys(jobDB)) || 0)) + 1
+        jobDB[id] = args
       }else if('cannel' === op){
         delete jobDB[args.id]
       }
       // flush
-      if(isFileStore){
-        //dbFilePath
-        fs.createWriteStream(dbFilePath).write(JSON.stringify(jobDB), (err) => {
-          if (err) throw err
-        })
-      }else{
-        // insert into db
-      }
+      fs.createWriteStream(dbFilePath).write(JSON.stringify(jobDB), (err) => {
+        if (err) throw err
+      })
+      return id
     }
 
     /**
@@ -95,8 +75,9 @@ export default {
     }
 
     const autorunJobs = () => {      
-      _.map(jobDB, (item) => {
-        createCronJob(item)
+      _.map(jobDB, (item, id) => {
+        if(item.autorun)
+          createCronJob(item)
       })
     }
 
@@ -105,91 +86,21 @@ export default {
       //extend module
       fpm.extendModule('job', {
         createCronJob: (args) => {
-          saveJobs('create', args)
+          let id = saveJobs('create', args)
+          args.id = id
           let data = createCronJob(args)
           return Promise.resolve(data)
         },
         cancelJob: cancelJob,
         getJobs: args => {
-          return _.map(jobs, (job, id) => {
-            return { id, name: job.name }
+          return _.map(jobDB, (job, id) => {
+            return _.assign(job, {id})
           })
         }
       })
 
       loadJobs()
-
-      //autorun jobs 
       autorunJobs()
     })
   }
 }
-/*
-var scheduleBiz = function(biz, fpm){
-
-  var jobs = [];
-
-  var startJob = function(args){
-    var job = schedule.scheduleJob(args.cron, function(){
-      var method = args.method;
-      var v = args.v;
-      fpm.execute(method, args, v)
-        .then(function(data){
-        })
-        .catch(function(err){
-          console.log('error from jobs');
-          console.log(err)
-        })
-    });
-    jobs[args.id] = job;
-    return {
-      data: {
-        jobId: args.id,
-        jobName: args.name
-      }
-    };
-  };
-
-  return {
-    auto: function(){
-      fpm.M.findAsync({table: 'fpm_schedule', condition: 'delflag = 0 and autorun = 1'})
-        .then(function(list){
-          _.map(list, function(j){
-              startJob(j)
-          })
-        })
-        .catch(function(err){
-          console.log(err);
-        })
-      return {
-        data: 1
-      }
-    },
-    stop: function(args){
-      var job = jobs[args.jobId];
-      if(job){
-        schedule.cancelJob(job)
-      }
-      return {
-        data: 1
-      }
-    },
-    start: startJob
-  };
-};
-
-module.exports = {
-  bind: function(fpm){
-    fpm.registerAction('BEFORE_MODULES_ADDED', function (args) {
-      var biz = args[0]
-      if(biz.v === '0.0.1'){
-        biz.m = _.assign(biz.m, {
-          schedule: scheduleBiz(biz, fpm)
-        })
-        biz.m.schedule.auto();
-      }
-    });
-  }
-
-};
-//*/
