@@ -1,16 +1,21 @@
 'use strict';
-import { Fpm, Biz } from 'yf-fpm-server'
+import { Fpm } from 'yf-fpm-server'
 import plugin from '../src'
 let app = new Fpm()
 plugin.bind(app)
 
-let biz = new Biz('0.0.1');
+let biz = app.createBiz('0.0.1');
 biz.addSubModules('demo',{
-    foo: () => {
-        console.log('demo.foo called')
-        Pormise.resolve(1)
+    foo: (args) => {
+        console.log('demo.foo called', args)
+        return Promise.resolve(1)
     }
 })
 app.addBizModules(biz);
-
+app.subscribe('cronjob.done', (topic, data) => {
+    console.log(data)
+})
+app.subscribe('cronjob.error', (topic, data) => {
+    console.log(data)
+})
 app.run()

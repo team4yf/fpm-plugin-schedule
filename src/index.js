@@ -42,24 +42,32 @@ export default {
      * cron!
      * @param {*} args 
      */
-    const createCronJob = (args) =>{
-      jobs[args.id] = schedule.scheduleJob(args.name, args.cron, () =>{
-        let { method, v } = args
+    const createCronJob = (params) =>{
+      jobs[params.id] = schedule.scheduleJob(params.name, params.cron, () =>{
+        let { method, args, v } = params
+        try{
+          args = JSON.parse(args || '{}')
+        }catch(e){
+          console.log('Args Format Error~', e)
+          args = {}
+        }
         fpm.execute(method, args, v)
           .then(data => {
             fpm.publish('cronjob.done', {
+              params,
               args,
               result: data
             })
           })
           .catch(err => {
             fpm.publish('cronjob.error', {
+              params,
               args,
               error: err
             })
           })
       })
-      const {id, name} = args
+      const {id, name} = params
       return {id, name}
     }
 
