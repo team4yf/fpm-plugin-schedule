@@ -1,7 +1,7 @@
 var should = require("chai").should();
-var YF = require("yf-fpm-client-nodejs").default;
+var YF = require("yf-fpm-client-js").default;
 
-YF.init({appkey: '123123', masterKey: '123123', endpoint: 'http://localhost:9999/api'});
+YF.init({appkey: '123123', masterKey: '123123', domain: 'http://localhost:9999'});
 
 
 describe('SCHEDULE', function(){

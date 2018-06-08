@@ -6,6 +6,30 @@
 yarn add fpm-plugin-schedule
 ```
 
+## Basic Info
+- Run Action Hook Name: `BEFORE_SERVER_START`
+- ExtendModule Name: `job`
+- Exception
+  - [x] `E.Job.JOB_CREATE_ERROR`
+    ```javascript
+    const E = {
+      Job: {
+        JOB_CREATE_ERROR: {
+          errno: -10031, 
+          code: 'JOB_CREATE_ERROR', 
+          message: 'The args should be an object-like'
+        }
+      }
+    }
+    ```
+- `getDependencies()`
+  - [x] `[]`
+- The Reference Of The `Bind()` Method
+  An BizModule Object Contains The Belw Functions
+  - [ ] `createCronJob`
+  - [ ] `cancelJob(id:Number!)`
+  - [ ] `getJobs`
+
 ### Useage
 
 - Create A Job
@@ -29,5 +53,5 @@ It will create schedule.json after you create anyone job
 
 ### Handle The Jobs' Result
 
-You can call `fpm.subscribe('cronjob.done')`; and the result in `data.result`
-You should call `fpm.subscribe('cronjob.error')`; and the error in `data.error`
+You can call `fpm.subscribe('#cronjob/done')`; and the result in `data.result`
+You should call `fpm.subscribe('#cronjob/error')`; and the error in `data.error`

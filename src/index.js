@@ -4,6 +4,16 @@ import schedule from 'node-schedule'
 import fs from 'fs'
 import path from 'path'
 
+const E = {
+  Job: {
+    JOB_CREATE_ERROR: {
+      errno: -10031, 
+      code: 'JOB_CREATE_ERROR', 
+      message: 'The args should be an object-like'
+    }
+  }
+}
+
 export default {
   bind: (fpm) => {
     // The Jobs Collection
@@ -48,19 +58,19 @@ export default {
         try{
           args = JSON.parse(args || '{}')
         }catch(e){
-          console.log('Args Format Error~', e)
+          return false
           args = {}
         }
         fpm.execute(method, args, v)
           .then(data => {
-            fpm.publish('cronjob.done', {
+            fpm.publish('#cronjob/done', {
               params,
               args,
               result: data
             })
           })
           .catch(err => {
-            fpm.publish('cronjob.error', {
+            fpm.publish('#cronjob/error', {
               params,
               args,
               error: err
@@ -89,26 +99,33 @@ export default {
       })
     }
 
+    const bizModule = {
+      createCronJob: (args) => {
+        let id = saveJobs('create', args)
+        args.id = id
+        let data = createCronJob(args)
+        if(data === false){
+          return Promise.reject(E.Job.JOB_CREATE_ERROR)
+        }
+        return Promise.resolve(data)
+      },
+      cancelJob: cancelJob,
+      getJobs: args => {
+        return _.map(jobDB, (job, id) => {
+          return _.assign(job, {id})
+        })
+      }
+    }
+
     fpm.registerAction('BEFORE_SERVER_START', () => {
 
       //extend module
-      fpm.extendModule('job', {
-        createCronJob: (args) => {
-          let id = saveJobs('create', args)
-          args.id = id
-          let data = createCronJob(args)
-          return Promise.resolve(data)
-        },
-        cancelJob: cancelJob,
-        getJobs: args => {
-          return _.map(jobDB, (job, id) => {
-            return _.assign(job, {id})
-          })
-        }
-      })
+      fpm.extendModule('job', bizModule)
 
       loadJobs()
       autorunJobs()
     })
+
+    return bizModule
   }
 }
