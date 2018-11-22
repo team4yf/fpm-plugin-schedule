@@ -1,10 +1,11 @@
 'use strict';
-import { Fpm } from 'yf-fpm-server'
-import plugin from '../src'
+const { Fpm } = require('yf-fpm-server');
+const plugin = require('../src');
 let app = new Fpm()
-plugin.bind(app)
-
+const ref = plugin.bind(app)
+console.info('the plugin ref:', ref)
 let biz = app.createBiz('0.0.1');
+
 biz.addSubModules('demo',{
     foo: (args) => {
         console.log('demo.foo called', args)
@@ -12,10 +13,10 @@ biz.addSubModules('demo',{
     }
 })
 app.addBizModules(biz);
-app.subscribe('cronjob.done', (topic, data) => {
-    console.log(data)
+app.subscribe('#cronjob/done', (topic, data) => {
+    console.log(data, new Date().toDateString())
 })
-app.subscribe('cronjob.error', (topic, data) => {
-    console.log(data)
+app.subscribe('#cronjob/error', (topic, data) => {
+    console.log(data, new Date().toDateString())
 })
 app.run()

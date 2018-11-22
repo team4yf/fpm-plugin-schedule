@@ -3,7 +3,7 @@
 
 ### Install
 ```bash
-yarn add fpm-plugin-schedule
+npm i fpm-plugin-schedule --save
 ```
 
 ## Basic Info

@@ -1,8 +1,8 @@
 "use strict";
-import _ from 'lodash'
-import schedule from 'node-schedule'
-import fs from 'fs'
-import path from 'path'
+const _ = require('lodash');
+const schedule = require('node-schedule');
+const fs = require('fs');
+const path = require('path');
 
 const E = {
   Job: {
@@ -14,14 +14,14 @@ const E = {
   }
 }
 
-export default {
+module.exports = {
   bind: (fpm) => {
     // The Jobs Collection
     const jobs = {}
 
     let jobDB = {}
 
-    let dbFilePath = path.join(fpm.get('CWD'), 'schedule.json') 
+    const dbFilePath = path.join(fpm.get('CWD'), 'schedule.json') 
 
     const loadJobs = () =>{
       if(fs.existsSync(dbFilePath)){
@@ -56,10 +56,12 @@ export default {
       jobs[params.id] = schedule.scheduleJob(params.name, params.cron, () =>{
         let { method, args, v } = params
         try{
-          args = JSON.parse(args || '{}')
+          if( _.isString(args)){
+            args = JSON.parse(args || '{}')
+          }
         }catch(e){
+          fpm.logger.error(e);
           return false
-          args = {}
         }
         fpm.execute(method, args, v)
           .then(data => {

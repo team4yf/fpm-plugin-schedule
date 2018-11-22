@@ -1,3 +1,18 @@
+## 2.1.0
+
+Change
+- Remove `yarn.lock`
+- Add `nodemon.json`
+
+Fixbugs
+- add type check in `JSON.parse`
+  ```javascript
+  // ignore parse JSON if args is object ;
+  if( _.isString(args)){
+    args = JSON.parse(args || '{}')
+  }
+  ```
+
 ## 2.0.2
 
 Change 
