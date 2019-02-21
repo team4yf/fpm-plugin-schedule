@@ -1,12 +1,11 @@
-var should = require("chai").should();
-var YF = require("yf-fpm-client-js").default;
-
-YF.init({appkey: '123123', masterKey: '123123', domain: 'http://localhost:9999'});
+const { init, Func } = require("fpmc-jssdk");
+const assert = require('assert');
+init({ appkey:'123123', masterKey:'123123', endpoint: 'http://localhost:9999/api' });
 
 
 describe('SCHEDULE', function(){
   beforeEach(done => {
-    var func = new YF.Func('job.createCronJob');
+    var func = new Func('job.createCronJob');
     func.invoke({method: 'demo.foo', v: '0.0.1', cron: '* * * * *', name: 'demo', autorun: 1, args: {message: 1}})
       .then(function(data){
         console.log(data)
@@ -23,7 +22,7 @@ describe('SCHEDULE', function(){
   })
 
   it('getJobs function', function(done){
-    var func = new YF.Func('job.getJobs');
+    var func = new Func('job.getJobs');
     func.invoke({})
       .then(function(data){
         console.log(data)

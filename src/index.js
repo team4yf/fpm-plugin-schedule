@@ -4,6 +4,7 @@ const schedule = require('node-schedule');
 const fs = require('fs');
 const path = require('path');
 
+const Storage = require('./storage/index.js');
 const E = {
   Job: {
     JOB_CREATE_ERROR: {
@@ -16,33 +17,12 @@ const E = {
 
 module.exports = {
   bind: (fpm) => {
+    
+    const config = fpm.getConfig('schedule', { storage: 'disk', filename: 'schedule.json' });
+    const options = _.assign({ fpm, storage: 'disk', filename: 'schedule.json' }, config)
+    const storage = Storage(options);
     // The Jobs Collection
     const jobs = {}
-
-    let jobDB = {}
-
-    const dbFilePath = path.join(fpm.get('CWD'), 'schedule.json') 
-
-    const loadJobs = () =>{
-      if(fs.existsSync(dbFilePath)){
-        jobDB = require(dbFilePath)
-      }    
-    }
-
-    const saveJobs = (op, args) =>{
-      let id
-      if('create' === op){
-        id = parseInt((_.max(_.keys(jobDB)) || 0)) + 1
-        jobDB[id] = args
-      }else if('cancel' === op){
-        delete jobDB[args.id]
-      }
-      // flush
-      fs.createWriteStream(dbFilePath).write(JSON.stringify(jobDB), (err) => {
-        if (err) throw err
-      })
-      return id
-    }
 
     /**
      * id!
@@ -83,39 +63,39 @@ module.exports = {
       return {id, name}
     }
 
-    const cancelJob = args => {
-      if(!_.has(jobs, args.id)){
-        return 0
-      }
-      const job = jobs[args.id]
-      schedule.cancelJob(job)
-      delete jobs[args.id]
-      saveJobs('cancel', args)
-      return 1
-    }
-
-    const autorunJobs = () => {      
-      _.map(jobDB, (item, id) => {
-        if(item.autorun)
-          createCronJob(item)
-      })
+    const autorunJobs = () => {  
+      storage._list()
+        .then(data => {
+          _.map(data, (item, id) => {
+            if(item.autorun)
+              createCronJob(item)
+          })
+        })    
+      
     }
 
     const bizModule = {
-      createCronJob: (args) => {
-        let id = saveJobs('create', args)
+      createCronJob: async (args) => {
+        let id = await storage._create(args);
         args.id = id
         let data = createCronJob(args)
         if(data === false){
           return Promise.reject(E.Job.JOB_CREATE_ERROR)
         }
-        return Promise.resolve(data)
+        return data;
       },
-      cancelJob: cancelJob,
-      getJobs: args => {
-        return _.map(jobDB, (job, id) => {
-          return _.assign(job, {id})
-        })
+      cancelJob: async (args) => {
+        if(!_.has(jobs, args.id)){
+          return 0
+        }
+        const job = jobs[args.id]
+        schedule.cancelJob(job)
+        delete jobs[args.id]
+        storage._cancel(args);  
+        return 1;      
+      },
+      getJobs: async args => {
+        return await storage._list();
       }
     }
 
@@ -123,8 +103,6 @@ module.exports = {
 
       //extend module
       fpm.extendModule('job', bizModule)
-
-      loadJobs()
       autorunJobs()
     })
 

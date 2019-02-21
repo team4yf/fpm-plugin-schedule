@@ -1,3 +1,10 @@
+## 2.2.0
+
+Add
+- support more data storage method.
+  - [ ] Mysql
+  - [x] Disk
+  
 ## 2.1.0
 
 Change

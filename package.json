@@ -16,17 +16,12 @@
     "node-schedule": "^1.2.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.22.2",
-    "babel-core": "^6.14.0",
-    "babel-plugin-transform-runtime": "^6.0.0",
-    "babel-polyfill": "^6.13.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-register": "^6.14.0",
     "babel-runtime": "^6.0.0",
     "chai": "^4.1.2",
+    "fpm-plugin-mysql": "^1.1.4",
+    "fpmc-jssdk": "^1.0.4",
     "mocha": "^5.1.1",
     "nodemon": "^1.17.3",
-    "yf-fpm-client-js": "^1.0.2",
     "yf-fpm-server": "^2.5.0"
   }
 }

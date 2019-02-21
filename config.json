@@ -1,0 +1,12 @@
+{
+  "mysql": {
+    "host": "localhost",
+    "database": "ruiwei",
+    "username": "root",
+    "password": "root",
+    "showSql": true
+  },
+  "schedule": {
+    "storage": "Mysql"
+  }
+}
