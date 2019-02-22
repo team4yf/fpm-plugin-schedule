@@ -2,10 +2,8 @@
   "name": "fpm-plugin-schedule",
   "version": "2.2.0",
   "description": "",
-  "main": "lib/index.js",
+  "main": "src/index.js",
   "scripts": {
-    "compile": "./node_modules/.bin/babel -d lib/ src/",
-    "prepublishOnly": "npm run compile",
     "dev": "./node_modules/.bin/nodemon dev/dev.js",
     "test": "./node_modules/.bin/mocha test/*.test.js"
   },
@@ -24,5 +22,8 @@
     "mocha": "^5.1.1",
     "nodemon": "^1.17.3",
     "yf-fpm-server": "^2.5.0"
+  },
+  "engines": {
+    "node": ">=8.11.1"
   }
 }
