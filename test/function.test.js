@@ -4,26 +4,42 @@ init({ appkey:'123123', masterKey:'123123', endpoint: 'http://localhost:9999/api
 
 
 describe('SCHEDULE', function(){
-  beforeEach(done => {
-    var func = new Func('job.createCronJob');
-    func.invoke({method: 'demo.foo', v: '0.0.1', cron: '* * * * *', name: 'demo', autorun: 1, args: {message: 1}})
-      .then(function(data){
-        console.log(data)
-        done();
-      }).catch(function(err){
-        done(err);
-      })
-  })
+  // beforeEach(done => {
+  //   var func = new Func('job.createCronJob');
+  //   func.invoke({method: 'demo.foo', v: '0.0.1', cron: '* * * * *', name: 'demo', autorun: 1, args: {message: 1}})
+  //     .then(function(data){
+  //       console.log(data)
+  //       done();
+  //     }).catch(function(err){
+  //       done(err);
+  //     })
+  // })
   
 
-  afterEach(done => {
-    console.log('done')
-    done()
-  })
+  // afterEach(done => {
+  //   var func = new Func('job.getJob');
+  //   func.invoke({ id: 1 })
+  //     .then(function(data){
+  //       console.log('The latest', data)
+  //       done();
+  //     }).catch(function(err){
+  //       done(err);
+  //     })
+  // })
 
-  it('getJobs function', function(done){
-    var func = new Func('job.getJobs');
-    func.invoke({})
+  // it('getJobs function', function(done){
+  //   var func = new Func('job.createCronJob');
+  //   func.invoke({method: 'demo.foo', v: '0.0.1', cron: '* * * * *', name: 'demo', autorun: 1, args: {message: 1}})
+  //     .then(function(data){
+  //       console.log(data)
+  //       done();
+  //     }).catch(function(err){
+  //       done(err);
+  //     })
+  // })
+  it('pauseJob function', function(done){
+    var func = new Func('job.pauseJob');
+    func.invoke({ id: 1 })
       .then(function(data){
         console.log(data)
         done();
@@ -31,4 +47,14 @@ describe('SCHEDULE', function(){
         done(err);
       })
   })
+  // it('restartJob function', function(done){
+  //   var func = new Func('job.restartJob');
+  //   func.invoke({ id: 1 })
+  //     .then(function(data){
+  //       console.log(data)
+  //       done();
+  //     }).catch(function(err){
+  //       done(err);
+  //     })
+  // })
 })

@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const fs = require('fs');
+const path = require('path');
 const assert = require('assert');
 
 const DiskStorage = function( options ){
@@ -13,6 +14,32 @@ const DiskStorage = function( options ){
   }
 }
 
+DiskStorage.prototype._onStart = function(){
+  // onStart;
+  return -1;
+}
+
+DiskStorage.prototype._onFinish = function(taskId, input){
+}
+
+DiskStorage.prototype._pause = function( input){
+  const { id } = input;
+  this.jobDB[id].autorun = 0;
+  this._save();
+  return 1;
+}
+
+DiskStorage.prototype._restart = function( input){
+  const { id } = input;
+  this.jobDB[id].autorun = 1;
+  this._save();
+  return 1;
+}
+
+DiskStorage.prototype._onError = function(taskId, input){
+
+}
+
 DiskStorage.prototype._save = function(){
   fs.createWriteStream(this.dbFilePath).write(JSON.stringify(this.jobDB), (err) => {
     if (err) throw err
@@ -21,6 +48,7 @@ DiskStorage.prototype._save = function(){
 
 DiskStorage.prototype._create = function(args){
   const id = parseInt((_.max(_.keys(this.jobDB)) || 0)) + 1;
+  args.id = id;
   this.jobDB[id] = args;
   this._save();
   return id;
@@ -34,6 +62,10 @@ DiskStorage.prototype._cancel = function(args){
   this._save();
 }
 
+DiskStorage.prototype._get = function(args){
+  const { id } = args;
+  return Promise.resolve(this.jobDB[id]);
+}
 
 DiskStorage.prototype._list = function(){
   return Promise.resolve(this.jobDB);

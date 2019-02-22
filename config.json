@@ -7,6 +7,6 @@
     "showSql": true
   },
   "schedule": {
-    "storage": "Mysql"
+    "storage": "disk"
   }
 }

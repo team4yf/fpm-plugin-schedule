@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "lodash": "^4.17.4",
+    "node-fetch": "^2.3.0",
     "node-schedule": "^1.2.0"
   },
   "devDependencies": {
