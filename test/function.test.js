@@ -18,7 +18,7 @@ describe('SCHEDULE', function(){
 
   // afterEach(done => {
   //   var func = new Func('job.getJob');
-  //   func.invoke({ id: 1 })
+  //   func.invoke({ id: 3 })
   //     .then(function(data){
   //       console.log('The latest', data)
   //       done();
@@ -39,7 +39,17 @@ describe('SCHEDULE', function(){
   // })
   it('pauseJob function', function(done){
     var func = new Func('job.pauseJob');
-    func.invoke({ id: 1 })
+    func.invoke({ id: 3 })
+      .then(function(data){
+        console.log(data)
+        done();
+      }).catch(function(err){
+        done(err);
+      })
+  })
+  it('callJob function', function(done){
+    var func = new Func('job.callJob');
+    func.invoke({ id: 5 })
       .then(function(data){
         console.log(data)
         done();
@@ -49,7 +59,7 @@ describe('SCHEDULE', function(){
   })
   // it('restartJob function', function(done){
   //   var func = new Func('job.restartJob');
-  //   func.invoke({ id: 1 })
+  //   func.invoke({ id: 3 })
   //     .then(function(data){
   //       console.log(data)
   //       done();

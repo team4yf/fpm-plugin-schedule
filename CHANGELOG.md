@@ -2,7 +2,7 @@
 
 Add
 - support more data storage method.
-  - [ ] Mysql
+  - [x] Mysql
   - [x] Disk
   
 ## 2.1.0

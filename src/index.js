@@ -140,21 +140,43 @@ module.exports = {
         return storage._pause(args);
       },
       restartJob: async args => {
-        const param = await storage._get(args);
-        if(param.autorun == 1){
-          return 1; // already running.
+        try {
+          const param = await storage._get(args);
+          if(param.autorun == 1){
+            return 1; // already running.
+          }
+          createCronJob(param);
+          return storage._restart(args);  
+        } catch (error) {
+          // cant get the job
+          return Promise.reject({
+            message: 'Job Not Exists'
+          })
         }
-        createCronJob(param);
-        return storage._restart(args);
+        
       },
       callJob: async args => {
-        // call job once
-        const param = await storage._get(args);
-        once(param);
-        return 1;
+        try {
+          // call job once
+          const param = await storage._get(args);
+          once(param);
+          return 1;
+        } catch (error) {
+          // cant get the job
+          return Promise.reject({
+            message: 'Job Not Exists'
+          })
+        } 
       },
       getJob: async args => {
-        return await storage._get(args);
+        try {
+          return await storage._get(args);
+        } catch (error) {
+          // cant get the job
+          return Promise.reject({
+            message: 'Job Not Exists'
+          })
+        }
       },
       getJobs: async args => {
         return await storage._list();
