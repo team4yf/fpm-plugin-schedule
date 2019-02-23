@@ -78,7 +78,7 @@ MysqlStorage.prototype._create = async function(args){
 
 MysqlStorage.prototype._cancel = function(args){
   const { id } = args;
-  assert(!_.isEmpty(id), 'Id required');
+  assert(id != undefined, 'Id required');
   this.M.removeAsync({
     table: 'job_schedule',
     id: id

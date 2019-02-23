@@ -124,13 +124,13 @@ module.exports = {
         return data;
       },
       cancelJob: async (args) => {
+        storage._cancel(args);  
         if(!_.has(jobs, args.id)){
           return 0
         }
         const job = jobs[args.id]
         schedule.cancelJob(job)
         delete jobs[args.id]
-        storage._cancel(args);  
         return 1;      
       },
       pauseJob: async args => {
