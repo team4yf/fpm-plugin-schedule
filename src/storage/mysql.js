@@ -68,7 +68,9 @@ MysqlStorage.prototype._onError = function(taskId, input){
 }
 
 MysqlStorage.prototype._create = async function(args){
-  args.args = JSON.stringify(args.args);
+  if(_.isObjectLike(args.args)){
+    args.args = JSON.stringify(args.args);
+  }  
   const data = await this.M.createAsync({
     table: 'job_schedule',
     row: args,
