@@ -1,3 +1,8 @@
+## 2.2.3(2019-03-26)
+Change
+- Update the `fpm-plugin-mysql`
+- autorun the sql scripts
+
 ## 2.2.0
 
 Add

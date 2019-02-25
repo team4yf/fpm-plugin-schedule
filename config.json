@@ -1,7 +1,7 @@
 {
   "mysql": {
     "host": "localhost",
-    "database": "ruiwei",
+    "database": "fpm",
     "username": "root",
     "password": "root",
     "showSql": true

@@ -1,5 +1,7 @@
-src/
 spec/
 dev/
 views/
 schedule.json
+db.lock
+config.json
+init.sql

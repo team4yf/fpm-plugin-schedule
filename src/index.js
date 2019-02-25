@@ -2,6 +2,7 @@
 const _ = require('lodash');
 const schedule = require('node-schedule');
 const fetch = require('node-fetch');
+const path = require('path');
 
 const Storage = require('./storage/index.js');
 const E = {
@@ -185,9 +186,24 @@ module.exports = {
 
     fpm.registerAction('BEFORE_SERVER_START', () => {
 
-      //extend module
-      fpm.extendModule('job', bizModule)
-      autorunJobs()
+      const startup = () => {
+        //extend module
+        fpm.extendModule('job', bizModule)
+        autorunJobs()
+      }
+      // Run the sql file
+      if(fpm.M){
+        fpm.M.install(path.join(__dirname, '../sql'))
+        .then(() => {
+          startup();
+        })
+        .catch(e => {
+          fpm.logger.error(e);
+        })
+      }else{
+        startup();
+      }
+      
     })
 
     return bizModule
