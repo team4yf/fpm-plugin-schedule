@@ -1,5 +1,6 @@
 "use strict";
 const _ = require('lodash');
+const parser = require('cron-parser');
 const schedule = require('node-schedule');
 const fetch = require('node-fetch');
 const path = require('path');
@@ -115,6 +116,12 @@ module.exports = {
     }
 
     const bizModule = {
+      getCronNext: async (args) => {
+        return parser.parseExpression(args.cron).next().getTime();
+      },
+      getCronPrev: async (args) => {
+        return parser.parseExpression(args.cron).prev().getTime();
+      },
       createCronJob: async (args) => {
         let id = await storage._create(args);
         args.id = id

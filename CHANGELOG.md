@@ -1,4 +1,9 @@
-## 2.2.3(2019-03-26)
+## 2.2.4(2019-02-27)
+Add
+- job.getCronNext({ cron: ''}) => timestamp
+- job.getCronPrev({ cron: ''}) => timestamp
+
+## 2.2.3(2019-02-26)
 Change
 - Update the `fpm-plugin-mysql`
 - autorun the sql scripts
