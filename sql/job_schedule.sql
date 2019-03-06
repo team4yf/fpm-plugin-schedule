@@ -14,6 +14,3 @@ CREATE TABLE IF NOT EXISTS `job_schedule` (
   `job_type` varchar(20) NOT NULL DEFAULT 'BIZ' COMMENT '计划任务的类型，BIZ：内部业务类；WEB：HTTP 请求', 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='the schedule list';
-INSERT INTO `job_schedule` (`id`, `delflag`, `createAt`, `updateAt`, `name`, `cron`, `autorun`, `method`, `v`, `args`, `webhook`, `job_type`) VALUES
-(1, 0, 0, 0, 'demo', '* * * * *', 1, 'demo.foo', '0.0.1', '{\"message\":1}', 'http://localhost:9999/webhook/biz/execute/ops', 'BIZ'),
-(2, 0, 0, 1550806670386, 'post local', '* * * * *', 0, 'http://localhost:9999/api', '0.0.1', '{}', 'http://localhost:9999/webhook/biz/execute/ops', 'WEB');
