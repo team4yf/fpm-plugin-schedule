@@ -174,7 +174,7 @@ module.exports = {
           return Promise.reject({
             message: 'Job Not Exists'
           })
-        } 
+        }
       },
       getJob: async args => {
         try {
@@ -191,25 +191,20 @@ module.exports = {
       }
     }
 
-    fpm.registerAction('BEFORE_SERVER_START', () => {
-
-      const startup = () => {
-        //extend module
-        fpm.extendModule('job', bizModule)
-        autorunJobs()
+    fpm.registerAction('BEFORE_SERVER_START', async () => {
+      // install the meta sql script if the storage is mysql
+      try {
+        if( config.storage === 'mysql' ){
+          if( !!fpm.M ){
+            await fpm.M.install(path.join(__dirname, '../sql'))
+          }
+        }
+      } catch (error) {
+        fpm.logger.error(error);
       }
-      // Run the sql file
-      if(fpm.M){
-        fpm.M.install(path.join(__dirname, '../sql'))
-        .then(() => {
-          startup();
-        })
-        .catch(e => {
-          fpm.logger.error(e);
-        })
-      }else{
-        startup();
-      }
+      fpm.extendModule('job', bizModule)
+      // auto run the jobs when startup
+      autorunJobs()
       
     })
 
