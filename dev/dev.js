@@ -9,7 +9,7 @@ let biz = app.createBiz('0.0.1');
 biz.addSubModules('demo',{
     foo: (args) => {
         console.log('demo.foo called', args)
-        return Promise.reject('foo.bar reject')
+        return Promise.reject({ message: 'foo.bar reject'})
     }
 })
 app.addBizModules(biz);

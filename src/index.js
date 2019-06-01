@@ -4,6 +4,7 @@ const parser = require('cron-parser');
 const schedule = require('node-schedule');
 const fetch = require('node-fetch');
 const path = require('path');
+const assert = require('assert');
 
 const Storage = require('./storage/index.js');
 const E = {
@@ -29,64 +30,66 @@ module.exports = {
 
     const once = async (params) => {
       const taskId = await storage._onStart(params);
-        let { method, args, v } = params
-        try{
-          if( _.isString(args)){
-            args = JSON.parse(args || '{}')
-          }
-        }catch(e){
-          fpm.logger.error(e);
-          return false
+      let { method, args, v } = params
+      try{
+        if( _.isString(args)){
+          args = JSON.parse(args || '{}')
         }
-        const { webhook, job_type = 'BIZ' } = params;
-        let isOk = true, feedback, data;
-        try {
-         
-          if(job_type == 'BIZ'){
-            data = await fpm.execute(method, args, v);
-            
-          }else{
-            const rsp = await fetch(method, {
-              method: 'post',
-              body:    JSON.stringify(args),
-              headers: { 'Content-Type': 'application/json' },
-            })
-            data = await rsp.json();
-          }
-          storage._onFinish(taskId, {
-            params,
-            args,
-            result: data
-          });
-          fpm.publish('#cronjob/done', {
-            params,
-            args,
-            result: data
-          })
-          feedback = data;
-        } catch (error) {
-          storage._onError(taskId, {
-              params,
-              args,
-              error
-            })
-            fpm.publish('#cronjob/error', {
-              params,
-              args,
-              error
-            })
-            isOk = false;
-            feedback = error;
-        }
-        if(webhook){
-          // need feedback
-          fetch(webhook, {
+      }catch(e){
+        fpm.logger.error(e);
+        return false
+      }
+      const { webhook, job_type = 'BIZ' } = params;
+      let isOk = true, feedback, data;
+      try {
+        
+        if(job_type == 'BIZ'){
+          data = await fpm.execute(method, args, v);
+          
+        }else{
+          const rsp = await fetch(method, {
             method: 'post',
-            body:    JSON.stringify({ code: isOk?0: -1, content: feedback }),
+            body:    JSON.stringify(args),
             headers: { 'Content-Type': 'application/json' },
           })
+          data = await rsp.json();
         }
-
+        storage._onFinish(taskId, {
+          params,
+          args,
+          result: data
+        });
+        fpm.publish('#cronjob/done', {
+          params,
+          args,
+          result: data
+        })
+        feedback = data;
+      } catch (error) {
+        storage._onError(taskId, {
+            params,
+            args,
+            error
+          })
+          fpm.publish('#cronjob/error', {
+            params,
+            args,
+            error
+          })
+          isOk = false;
+          feedback = error;
+      }
+      if(webhook){
+        // need feedback
+        fetch(webhook, {
+          method: 'post',
+          body:    JSON.stringify({ code: isOk?0: -1, content: feedback }),
+          headers: { 'Content-Type': 'application/json' },
+        })
+      }
+      if( isOk )
+        return feedback;
+      return Promise.reject(feedback)
     }
     /**
      * id!
@@ -98,7 +101,9 @@ module.exports = {
      */
     const createCronJob = (params) =>{
       jobs[params.id] = schedule.scheduleJob(params.name, params.cron, () =>{
-        once(params);
+        once(params).catch(( error ) => {
+          // ignore the error!
+        });
       })
       const {id, name} = params
       return {id, name}
@@ -111,7 +116,7 @@ module.exports = {
             if(item.autorun)
               createCronJob(item)
           })
-        })    
+        })
       
     }
 
@@ -167,13 +172,11 @@ module.exports = {
         try {
           // call job once
           const param = await storage._get(args);
-          once(param);
-          return 1;
+          const rsp = await once(param);
+          return rsp
         } catch (error) {
           // cant get the job
-          return Promise.reject({
-            message: 'Job Not Exists'
-          })
+          return Promise.reject(error)
         }
       },
       getJob: async args => {
@@ -195,17 +198,16 @@ module.exports = {
       // install the meta sql script if the storage is mysql
       try {
         if( config.storage === 'mysql' ){
-          if( !!fpm.M ){
-            await fpm.M.install(path.join(__dirname, '../sql'))
-          }
+          assert(!!fpm.M, 'Mysql Plugin Not Installed!');
+          await fpm.M.install(path.join(__dirname, '../sql'))
         }
+        fpm.extendModule('job', bizModule)
+        // auto run the jobs when startup
+        autorunJobs()
       } catch (error) {
         fpm.logger.error(error);
+        throw error;
       }
-      fpm.extendModule('job', bizModule)
-      // auto run the jobs when startup
-      autorunJobs()
-      
     })
 
     return bizModule
