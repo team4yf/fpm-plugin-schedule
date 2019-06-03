@@ -56,7 +56,7 @@ DiskStorage.prototype._create = function(args){
 
 DiskStorage.prototype._cancel = function(args){
   const { id } = args;
-  assert(!_.isEmpty(id), 'Id required');
+  assert(!!id, 'Id required');
   delete this.jobDB[id];
   // save it
   this._save();

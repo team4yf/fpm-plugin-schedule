@@ -47,16 +47,16 @@ describe('SCHEDULE', function(){
   //       done(err);
   //     })
   // })
-  it('callJob function', function(done){
-    var func = new Func('job.callJob');
-    func.invoke({ id: 1 })
-      .then(function(data){
-        console.log(data)
-        done();
-      }).catch(function(err){
-        done(err);
-      })
-  })
+  // it('callJob function', function(done){
+  //   var func = new Func('job.callJob');
+  //   func.invoke({ id: 1 })
+  //     .then(function(data){
+  //       console.log(data)
+  //       done();
+  //     }).catch(function(err){
+  //       done(err);
+  //     })
+  // })
   // it('restartJob function', function(done){
   //   var func = new Func('job.restartJob');
   //   func.invoke({ id: 3 })
@@ -67,14 +67,15 @@ describe('SCHEDULE', function(){
   //       done(err);
   //     })
   // })
-    // it('cancel function', function(done){
-    // var func = new Func('job.cancelJob');
-    // func.invoke({ id: 3 })
-    //   .then(function(data){
-    //     console.log(data)
-    //     done();
-    //   }).catch(function(err){
-    //     done(err);
-    //   })
+  it('cancel function', function(done){
+    var func = new Func('job.cancelJob');
+    func.invoke({ id: 1 })
+      .then(function(data){
+        console.log(data)
+        done();
+      }).catch(function(err){
+        done(err);
+      })
+    })
 })
 
